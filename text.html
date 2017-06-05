@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <title>Document</title>
+        <style type="text/css">
+                .box {
+                        border: 1px solid #ccc;
+                        width: 930px;
+                        position: relative;
+                        margin: 50px auto;
+                        border: 10px solid #C1C1C1;
+                        padding: 10px;
+                }
+                * {
+                        margin: 0px;
+                        padding: 0px;
+                        list-style: none;
+                }
+                .left, .right {
+                        width: 398px;
+                        height: 298px;
+                        border: 1px dashed #9A9A9A;
+                        text-indent: 2em;        /*首行缩进*/
+                        font-size: 16px;
+                        resize: none;                /*去掉textarea右下角的大小调节*/
+                }
+                .left {
+                        background: #efefd6;
+                }
+                .right {
+                        background: #63eff7;
+                }
+                .btn {
+                        border: none;
+                        width: 100px;
+                        height: 40px;
+                        line-height: 40px;
+                        background: #f76300;
+                        text-align: center;
+                        color: #fff;
+                        font-size: 18px;
+                        vertical-align: top;
+                        margin: 0px 15px;
+
+                }
+                .number {
+                        width: 100px;
+                        height: 20px;
+                        line-height: 20px;
+                        text-align: center;
+                        position: absolute;
+                        font-size: 16px;
+                        left: 0px;
+                        right: 0px;
+                        top: 80px;
+                        margin: 0px auto;
+                }
+                ul {
+                        opacity: 0;
+                        position: absolute;
+                        left: 0px;
+                        right: 0px;
+                        top: 120px;
+                        margin: 0px auto;
+                        width: 120px;
+                }
+                li {
+                        position: absolute;
+                        width: 18px;
+                        height: 18px;
+                        background: #FEC55F;
+                }
+        </style>
+        <script type="text/javascript">
+                window.onload = function (){
+                        var aSpan = document.getElementsByTagName('span');
+                        var oUl = document.getElementsByTagName('ul')[0];
+                        var aLi = document.getElementsByTagName('li');
+                        var oInput = document.getElementsByTagName('input')[0];
+                        var aText = document.getElementsByTagName('textarea');
+                        for(var i=0;i<aLi.length;i++){
+                                aLi[i].style.left = 20*i + 'px';
+                        }
+
+
+                        oInput.onclick = function(){
+                                if(!aText[0].value){
+                                        alert('请输入文本信息');
+                                        return                        //>>>>>>>当第一框内容为空时，弹出提示信息并停止执行后续代码
+                                }
+                                oInput.disabled = true;        //按钮点击后不可用，防止计时器反复执行
+                                oInput.style.background = '#A7A7A7';
+                                opacity(oUl,'opacity',0.1,1);        //进度条开始出现
+                                aText[1].value = '';                        //每次开始时都清空右侧框内文本
+                                var str1 = aText[0].value;
+                                aSpan[2].innerHTML = str1.length;                //文本总长度
+                                clearInterval(oInput.timer);
+                                oInput.timer = setInterval(function(){
+                                        aText[1].value += str1.substring(0,1)        
+                                        //不停的截取str1的第一个字符（配合下一行str1的变化，每次获取的字符是不同的）
+                                        str1 = str1.substring(1,str1.length)        
+                                        //不停的截取str1去除第一个字符的部分，并赋值给str1本身（不停的去掉str1的第一个字符）
+                                        aText[0].value = str1;
+                                        aSpan[0].innerHTML = aText[1].value.length;                //不停的获取右侧文本的长度，长度数字实时变化
+                                        if(aText[0].value == ""){        //两侧文本长度相同时结束
+                                                clearInterval(oInput.timer)
+                                                opacity(oUl,'opacity',0.1,0);
+                                                oInput.disabled = false;
+                                                oInput.style.background = '#f76300';
+                                        }
+                                },20)
+                                goColor();                        //>>>>>>>>进度条的动画效果
+                                
+                        }
+
+                        function goColor(n){        //>>>>>>>>进度条的动画效果
+                                var n=0;
+                                oUl.goColor = setInterval(function(){
+                                        for(var i=0;i<aLi.length;i++){
+                                                aLi[i].style.background = '#FEC55F';
+                                        }
+                                        aLi[n].style.background = '#FB454F';
+                                        n++;
+                                        n= n>=aLi.length? 0:n;
+                                        if(aText[0].value == ""){
+                                                clearInterval(oUl.goColor)
+                                        }
+                                },50)
+                                
+                        } 
+
+                        function opacity(obj,attr,dir,target,endfn){        
+                                dir = parseFloat(getStyle(obj,attr))>target? -dir:dir;
+                                if (obj.onoff){
+                                        return
+                                }
+                                obj.onoff = true;
+                                clearInterval(obj.timer);
+                                obj.timer = setInterval(function(){
+                                        var speed = parseFloat(getStyle(obj,attr)) + dir;
+                                        if(speed>target&&dir>0 || speed<target&&dir<0){
+                                                speed = target;
+                                                obj.style[attr] = speed;
+                                        }
+                                        obj.style[attr] = speed;
+                                        if(speed===target){
+                                                clearInterval(obj.timer);
+                                                endfn&&endfn();
+                                                obj.onoff = false;
+                                        }
+                                },50)
+                        }
+
+                        function getStyle(obj,attr){
+                                return obj.currentStyle? obj.currentStyle[attr]:getComputedStyle(obj)[attr];
+                        }
+                }
+        </script>
+</head>
+<body>
+        <div class="box">
+                <div>
+                        <textarea class="left"></textarea><input type="button" value="文字右移" class="btn"><textarea type="text-area" class="right" disabled=true></textarea>
+                </div>
+                <div class="number">
+                        <span>0</span><span>/</span><span>0</span>
+                </div>
+                <ul>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                </ul>
+        </div>
+</body>
+</html>
